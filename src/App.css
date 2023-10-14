@@ -11,11 +11,18 @@ body {
   left: 0;
   right: 0;
 }
-
+.active-digit {
+  position: relative;
+}
 .active-digit::after {
   content: "";
-  animation: cursor-blink 1.25s steps(2) infinite;
+  animation: cursor-blink 1s steps(2) infinite;
   border-right: 2px solid #e06b88;
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  right: -2px;
+  top: 2px;
 }
 
 @keyframes cursor-blink {

@@ -61,9 +61,10 @@ function App() {
           style={{
             display: "block",
             width: "0.4rem",
-            height: "0.5rem",
+            height: "2.5rem",
           }}
           onClick={(event) => {
+            event.stopPropagation();
             const index = parseInt(event.currentTarget.id.split("-")[2]);
             inputRef.current?.setSelectionRange(index, index);
             keyboardRef.current?.setCaretPosition(index);
@@ -82,17 +83,14 @@ function App() {
           id={"digit-" + displayDigitIndex}
           key={key}
           onClick={(event) => {
-            const index = parseInt(event.currentTarget.id.split("-")[1]);
+            event.stopPropagation();
+            const index = parseInt(event.currentTarget.id.split("-")[1]) - 1;
             inputRef.current?.setSelectionRange(index, index);
             keyboardRef.current?.setCaretPosition(index);
             setRenderCount((count) => count + 1);
           }}
           style={{
             display: "block",
-            // borderRight:
-            //   currentCaret === displayDigitIndex
-            //     ? "2px solid #e06b88"
-            //     : "2px solid transparent",
           }}
         >
           {digit}
@@ -121,7 +119,8 @@ function App() {
         <div
           key={countryCode}
           id={countryCode}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setCurrentCountryCode(countryCode);
             setIsCountryListOpen(false);
             setCountrySearchText("");
@@ -225,8 +224,25 @@ function App() {
             paddingLeft: "0.5rem",
             width: "100%",
           }}
-          onClick={() => setActiveInput("phone")}
+          onClick={() => {
+            setActiveInput("phone");
+            keyboardRef.current?.setInput(input, "phone");
+            keyboardRef.current?.setCaretPosition(input.length);
+            inputRef.current?.setSelectionRange(input.length, input.length);
+            setRenderCount((count) => count + 1);
+            console.log("clicked input");
+          }}
         >
+          {input.length === 0 && (
+            <span
+              style={{
+                fontSize: "small",
+                color: "#e28b7a",
+              }}
+            >
+              Phone number
+            </span>
+          )}
           {displayDigits}
         </div>
       </div>
