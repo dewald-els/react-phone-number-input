@@ -78,6 +78,7 @@ function App() {
       const key = "digit-" + displayDigitIndex;
       return (
         <span
+          className={currentCaret === displayDigitIndex ? "active-digit" : ""}
           id={"digit-" + displayDigitIndex}
           key={key}
           onClick={(event) => {
@@ -88,10 +89,10 @@ function App() {
           }}
           style={{
             display: "block",
-            borderBottom:
-              currentCaret === displayDigitIndex
-                ? "2px solid #e06b88"
-                : "2px solid transparent",
+            // borderRight:
+            //   currentCaret === displayDigitIndex
+            //     ? "2px solid #e06b88"
+            //     : "2px solid transparent",
           }}
         >
           {digit}
