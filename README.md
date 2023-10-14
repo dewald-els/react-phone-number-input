@@ -1,27 +1,19 @@
-# React + TypeScript + Vite
+# React Phone Number format with Virtual keyboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Allow using the React Simple Keyboard package with the libphonenumber-js package.
 
-Currently, two official plugins are available:
+## Why?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The caret positioning of inputs are out of sync when the values are formatted by the libphonenumber-js plugin.
 
-## Expanding the ESLint configuration
+## Solution
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Create a hidden input that stored the actual value that is entered. This value is NOT formatted and thus, allows the React Simple Keyboard package to track the current cursor position.
 
-- Configure the top-level `parserOptions` property like this:
+An additional component is rendered that displays the formatted value. The current cursor position is inherited from the React Simple Keyboard and translated to the displayed input.
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+## Links
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- [React Simple Keyboard](https://www.npmjs.com/package/react-simple-keyboard)
+- [libphonenumber-js](https://www.npmjs.com/package/libphonenumber-js)
+- [Flag CDN](https://flagcdn.com)
