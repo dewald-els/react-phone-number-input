@@ -11,6 +11,13 @@ body {
   left: 0;
   right: 0;
 }
+.phone-number-digit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.4rem;
+  height: 2.5rem;
+}
 .active-digit {
   position: relative;
 }
@@ -22,7 +29,7 @@ body {
   width: 2px;
   height: 20px;
   right: -2px;
-  top: 2px;
+  top: 10px;
 }
 
 @keyframes cursor-blink {

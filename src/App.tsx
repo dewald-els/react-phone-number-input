@@ -20,6 +20,21 @@ const getCurrentKeyboardCaretPosition = (keyboard: SimpleKeyboard | null) => {
     : keyboard?.caretPosition;
 };
 
+type PhoneNumberDigitProps = {
+  digit: string;
+  id: string;
+  onClick: (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
+} & React.HTMLAttributes<HTMLSpanElement>;
+
+const PhoneNumberDigit: React.FC<PhoneNumberDigitProps> = (props) => {
+  const { id, onClick, digit, ...rest } = props;
+  return (
+    <span id={id} key={id} onClick={onClick} {...rest}>
+      {digit}
+    </span>
+  );
+};
+
 function App() {
   const countries = getCountries();
   console.log("countries", countries);
@@ -57,14 +72,10 @@ function App() {
     if (isNaN(parseInt(digit))) {
       const key = "non-digit-" + displayDigitIndex;
       return (
-        <span
+        <PhoneNumberDigit
           id={key}
-          key={key}
-          style={{
-            display: "block",
-            width: "0.4rem",
-            height: "2.5rem",
-          }}
+          digit={digit}
+          className="phone-number-digit"
           onClick={(event) => {
             event.stopPropagation();
             const index = parseInt(event.currentTarget.id.split("-")[2]);
@@ -72,18 +83,19 @@ function App() {
             keyboardRef.current?.setCaretPosition(index);
             setRenderCount((count) => count + 1);
           }}
-        >
-          {digit}
-        </span>
+        />
       );
     } else {
       displayDigitIndex++;
       const key = "digit-" + displayDigitIndex;
       return (
-        <span
-          className={currentCaret === displayDigitIndex ? "active-digit" : ""}
-          id={"digit-" + displayDigitIndex}
-          key={key}
+        <PhoneNumberDigit
+          id={key}
+          digit={digit}
+          className={
+            "phone-number-digit " +
+            (currentCaret === displayDigitIndex ? "active-digit" : "")
+          }
           onClick={(event) => {
             event.stopPropagation();
             const index = parseInt(event.currentTarget.id.split("-")[1]) - 1;
@@ -91,12 +103,7 @@ function App() {
             keyboardRef.current?.setCaretPosition(index);
             setRenderCount((count) => count + 1);
           }}
-          style={{
-            display: "block",
-          }}
-        >
-          {digit}
-        </span>
+        />
       );
     }
   });
