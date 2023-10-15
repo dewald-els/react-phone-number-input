@@ -9,6 +9,8 @@ import {
   getCountries,
   getCountryCallingCode,
 } from "libphonenumber-js";
+import CountrySearchFlagButton from "./components/CountrySearchFlagButton";
+import CountrySearchCountryList from "./components/CountrySearchCountryList";
 
 const getCurrentKeyboardCaretPosition = (keyboard: SimpleKeyboard | null) => {
   return keyboard?.caretPosition === undefined
@@ -157,20 +159,10 @@ function App() {
             defaultValue={countrySearchText}
           />
         </div>
-        <div
-          className="options"
-          style={{
-            display: isCountryListOpen ? "block" : "none",
-            backgroundColor: "#ffffe3",
-            border: "2px solid #e28b7a",
-            maxHeight: "10rem",
-            overflowY: "scroll",
-            position: "absolute",
-            width: "100%",
-          }}
-        >
-          {countryCodeOptions}
-        </div>
+        <CountrySearchCountryList
+          isCountryListOpen={isCountryListOpen}
+          countryCodeOptions={countryCodeOptions}
+        />
       </div>
       <div className="input">
         <input
@@ -193,25 +185,13 @@ function App() {
           marginBottom: "1rem",
         }}
       >
-        <div
+        <CountrySearchFlagButton
+          currentCountryCode={currentCountryCode}
           onClick={() => {
             setIsCountryListOpen(!isCountryListOpen);
             setActiveInput("countrySearch");
           }}
-          className="flag"
-          style={{
-            marginRight: "0.5rem",
-          }}
-        >
-          <img
-            style={{
-              display: "block",
-            }}
-            width={30}
-            src={`https://flagcdn.com/h40/${currentCountryCode.toLowerCase()}.png`}
-            alt={currentCountryCode}
-          />
-        </div>
+        />
 
         <div
           style={{
