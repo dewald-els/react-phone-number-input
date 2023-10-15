@@ -237,6 +237,9 @@ function App() {
       <div className="custom-keyboard">
         <KeyboardReact
           inputName={activeInput}
+          layout={{
+            default: ["1 2 3", "4 5 6", "7 8 9", "{bksp} 0 {enter}"],
+          }}
           onInit={(keyboard) => {
             keyboardRef.current = keyboard as SimpleKeyboard;
             keyboardRef.current?.setInput(input, activeInput);
