@@ -51,6 +51,7 @@ function App() {
     currentCountryCode
   );
   const [countrySearchText, setCountrySearchText] = useState("");
+  const [currentLayout, setCurrentLayout] = useState("phone");
 
   console.log("formattedPhoneNumber", formattedPhoneNumber);
 
@@ -135,6 +136,7 @@ function App() {
             setCountrySearchText("");
             keyboardRef.current?.setInput("", "countrySearch");
             setActiveInput("phone");
+            setCurrentLayout("phone");
           }}
         >
           <span>+{callingCode}</span> - <span>{countryName}</span>
@@ -162,7 +164,10 @@ function App() {
             type="text"
             autoFocus={true}
             placeholder="Search for country"
-            onFocus={() => setActiveInput("countrySearch")}
+            onFocus={() => {
+              setActiveInput("countrySearch");
+              setCurrentLayout("default");
+            }}
             defaultValue={countrySearchText}
           />
         </div>
@@ -197,6 +202,7 @@ function App() {
           onClick={() => {
             setIsCountryListOpen(!isCountryListOpen);
             setActiveInput("countrySearch");
+            setCurrentLayout("default");
           }}
         />
 
@@ -213,6 +219,7 @@ function App() {
           }}
           onClick={() => {
             setActiveInput("phone");
+            setCurrentLayout("phone");
             keyboardRef.current?.setInput(input, "phone");
             keyboardRef.current?.setCaretPosition(input.length);
             inputRef.current?.setSelectionRange(input.length, input.length);
@@ -237,8 +244,15 @@ function App() {
       <div className="custom-keyboard">
         <KeyboardReact
           inputName={activeInput}
+          layoutName={currentLayout}
           layout={{
-            default: ["1 2 3", "4 5 6", "7 8 9", "{bksp} 0 {enter}"],
+            default: [
+              "q w e r t y u i o p {bksp}",
+              "a s d f g h j k l",
+              "z x c v b n m ",
+              "{space} {enter}",
+            ],
+            phone: ["1 2 3", "4 5 6", "7 8 9", "{bksp} 0 {enter}"],
           }}
           onInit={(keyboard) => {
             keyboardRef.current = keyboard as SimpleKeyboard;
