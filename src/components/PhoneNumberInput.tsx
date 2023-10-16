@@ -6,9 +6,11 @@ import {
   formatIncompletePhoneNumber,
   getCountries,
   getCountryCallingCode,
+  parsePhoneNumber,
 } from "libphonenumber-js";
 import CountrySearchFlagButton from "./CountrySearchFlagButton";
 import CountrySearchCountryList from "./CountrySearchCountryList";
+import { PhoneNumberInputSize } from "./types";
 
 const getCurrentKeyboardCaretPosition = (keyboard: SimpleKeyboard | null) => {
   return keyboard?.caretPosition === undefined
@@ -16,6 +18,48 @@ const getCurrentKeyboardCaretPosition = (keyboard: SimpleKeyboard | null) => {
     : keyboard?.caretPosition === null
     ? 1
     : keyboard?.caretPosition;
+};
+
+const getPhoneNumberInputSizeInputPixels = (size: PhoneNumberInputSize) => {
+  switch (size) {
+    case PhoneNumberInputSize.Small:
+      return "10rem";
+    case PhoneNumberInputSize.Medium:
+      return "13rem";
+    case PhoneNumberInputSize.Large:
+      return "20rem";
+    default:
+      return "13rem";
+  }
+};
+
+type GetPhoneNumberWithoutDiallingCodeArgs = {
+  phoneNumberWithDiallingCode: string;
+  countryCode: CountryCode;
+};
+
+const getPhoneNumberWithoutDiallingCode = (
+  args: GetPhoneNumberWithoutDiallingCodeArgs
+) => {
+  try {
+    const { phoneNumberWithDiallingCode, countryCode } = args;
+
+    const parsedPhoneNumber = parsePhoneNumber(
+      phoneNumberWithDiallingCode,
+      countryCode
+    );
+    if (parsedPhoneNumber && parsedPhoneNumber.nationalNumber) {
+      const numberWithLocalPrefix = parsedPhoneNumber.format("NATIONAL", {
+        nationalPrefix: true,
+      });
+      // We only want numbers. The formatter will apply special chars/spaces.
+      return numberWithLocalPrefix.replace(/[^0-9]/g, "");
+    } else {
+      return args.phoneNumberWithDiallingCode;
+    }
+  } catch (error) {
+    return args.phoneNumberWithDiallingCode;
+  }
 };
 
 type PhoneNumberDigitProps = {
@@ -33,16 +77,41 @@ const PhoneNumberDigit: React.FC<PhoneNumberDigitProps> = (props) => {
   );
 };
 
-function PhoneNumberInput() {
+type PhoneNumberInputProps = {
+  defaultValue?: string;
+  defaultCountryCode: CountryCode;
+  onCountryCodeChange: (countryCode: CountryCode) => void;
+  onPhoneNumberChange: (phoneNumber: string) => void;
+  size?: PhoneNumberInputSize;
+};
+
+const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
+  const {
+    onCountryCodeChange,
+    onPhoneNumberChange,
+    defaultValue = "",
+    defaultCountryCode,
+    size = PhoneNumberInputSize.Medium,
+  } = props;
   const countries = getCountries();
-  console.log("countries", countries);
+  const defaultPhoneNumberWithoutDiallingCode =
+    getPhoneNumberWithoutDiallingCode({
+      phoneNumberWithDiallingCode: defaultValue,
+      countryCode: defaultCountryCode,
+    });
+
+  console.log(
+    "defaultPhoneNumberWithoutDiallingCode",
+    defaultPhoneNumberWithoutDiallingCode
+  );
+
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [currentCountryCode, setCurrentCountryCode] =
-    useState<CountryCode>("ZA");
+    useState<CountryCode>(defaultCountryCode);
   const keyboardRef = useRef<SimpleKeyboard | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [_, setRenderCount] = useState(0); // Forcing re-render
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(defaultPhoneNumberWithoutDiallingCode);
   const [activeInput, setActiveInput] = useState("phone");
   const formattedPhoneNumber = formatIncompletePhoneNumber(
     input,
@@ -51,10 +120,9 @@ function PhoneNumberInput() {
   const [countrySearchText, setCountrySearchText] = useState("");
   const [currentLayout, setCurrentLayout] = useState("phone");
 
-  console.log("formattedPhoneNumber", formattedPhoneNumber);
-
   if (inputRef.current && keyboardRef.current) {
     setTimeout(() => {
+      console.log("setting caret on DOM", keyboardRef.current?.caretPosition);
       // Give the DOM time to re-render.
       inputRef.current?.focus();
       inputRef.current?.setSelectionRange(
@@ -73,6 +141,7 @@ function PhoneNumberInput() {
       return (
         <PhoneNumberDigit
           id={key}
+          key={key}
           digit={digit}
           className="phone-number-digit"
           onClick={(event) => {
@@ -90,6 +159,7 @@ function PhoneNumberInput() {
       return (
         <PhoneNumberDigit
           id={key}
+          key={key}
           digit={digit}
           className={
             "phone-number-digit " +
@@ -135,6 +205,7 @@ function PhoneNumberInput() {
             keyboardRef.current?.setInput("", "countrySearch");
             setActiveInput("phone");
             setCurrentLayout("phone");
+            onCountryCodeChange(countryCode);
           }}
         >
           <span>+{callingCode}</span> - <span>{countryName}</span>
@@ -142,10 +213,11 @@ function PhoneNumberInput() {
       );
     });
 
-  console.log("current caret position: ", keyboardRef.current?.caretPosition);
+  const phoneNumberInputSizeInputPixels =
+    getPhoneNumberInputSizeInputPixels(size);
 
   return (
-    <div className="App">
+    <div className="phone-number-input">
       <p>Country Code: {currentCountryCode}</p>
       <div
         style={{
@@ -204,6 +276,7 @@ function PhoneNumberInput() {
         />
 
         <div
+          key="phone-number-input-digits"
           style={{
             display: "flex",
             alignItems: "center",
@@ -211,16 +284,16 @@ function PhoneNumberInput() {
             height: "2rem",
             borderRadius: "0.5rem",
             paddingLeft: "0.5rem",
-            width: "320px",
+            width: phoneNumberInputSizeInputPixels,
           }}
-          onClick={() => {
-            setActiveInput("phone");
-            setCurrentLayout("phone");
+          onClick={(event) => {
+            event.stopPropagation();
             keyboardRef.current?.setInput(input, "phone");
             keyboardRef.current?.setCaretPosition(input.length);
             inputRef.current?.setSelectionRange(input.length, input.length);
+            setActiveInput("phone");
+            setCurrentLayout("phone");
             setRenderCount((count) => count + 1);
-            console.log("clicked input");
           }}
         >
           {input.length === 0 && (
@@ -261,6 +334,9 @@ function PhoneNumberInput() {
           onChange={(newInput) => {
             if (activeInput === "phone") {
               setInput(newInput);
+              const diallingCode =
+                getCountryCallingCode(currentCountryCode) ?? "";
+              onPhoneNumberChange(`+${diallingCode}${newInput}`);
             } else {
               setCountrySearchText(newInput);
             }
@@ -269,6 +345,6 @@ function PhoneNumberInput() {
       </div>
     </div>
   );
-}
+};
 
 export default PhoneNumberInput;
