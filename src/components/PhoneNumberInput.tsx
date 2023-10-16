@@ -80,6 +80,7 @@ const PhoneNumberDigit: React.FC<PhoneNumberDigitProps> = (props) => {
 type PhoneNumberInputProps = {
   defaultValue?: string;
   defaultCountryCode: CountryCode;
+  language?: string;
   onCountryCodeChange: (countryCode: CountryCode) => void;
   onPhoneNumberChange: (phoneNumber: string) => void;
   size?: PhoneNumberInputSize;
@@ -92,6 +93,7 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
     defaultValue = "",
     defaultCountryCode,
     size = PhoneNumberInputSize.Medium,
+    language = "en",
   } = props;
   const countries = getCountries();
   const defaultPhoneNumberWithoutDiallingCode =
@@ -99,18 +101,18 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
       phoneNumberWithDiallingCode: defaultValue,
       countryCode: defaultCountryCode,
     });
-
-  console.log(
-    "defaultPhoneNumberWithoutDiallingCode",
-    defaultPhoneNumberWithoutDiallingCode
-  );
-
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [currentCountryCode, setCurrentCountryCode] =
     useState<CountryCode>(defaultCountryCode);
   const keyboardRef = useRef<SimpleKeyboard | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [_, setRenderCount] = useState(0); // Forcing re-render
+  /**
+   * Hello, you maybe be wondering why we keep internal track of the input.
+   * This is done because we need a copy of the number that has not been tainted by the formatting.
+   * This is essential in managing the caret position. So please do not "lift the state up", since it would circumvent the caret position logic.
+   * Also, we need to have the api to use the PhoneNumberInput to be simple. So from the "outsider's" perspective, they on need to know the phone number and country code.
+   */
   const [input, setInput] = useState(defaultPhoneNumberWithoutDiallingCode);
   const [activeInput, setActiveInput] = useState("phone");
   const formattedPhoneNumber = formatIncompletePhoneNumber(
@@ -120,6 +122,7 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
   const [countrySearchText, setCountrySearchText] = useState("");
   const [currentLayout, setCurrentLayout] = useState("phone");
 
+  // Updating DOM Elements with the caret position.
   if (inputRef.current && keyboardRef.current) {
     setTimeout(() => {
       console.log("setting caret on DOM", keyboardRef.current?.caretPosition);
@@ -132,6 +135,7 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
     }, 50);
   }
 
+  // Create the individual phone number digits with the correct click handlers.
   let displayDigitIndex = 0;
   const currentCaret = getCurrentKeyboardCaretPosition(keyboardRef.current);
 
@@ -177,9 +181,10 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
     }
   });
 
+  // Create the list of country codes that match the search text.
   const countryCodeOptions = countries
     .filter((countryCode) => {
-      const regionName = new Intl.DisplayNames(["en"], {
+      const regionName = new Intl.DisplayNames([language], {
         type: "region",
       });
       const countryName = regionName.of(countryCode);
@@ -189,7 +194,7 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = (props) => {
     })
     .map((countryCode) => {
       const callingCode = getCountryCallingCode(countryCode);
-      const regionName = new Intl.DisplayNames(["en"], {
+      const regionName = new Intl.DisplayNames([language], {
         type: "region",
       });
       const countryName = regionName.of(countryCode);

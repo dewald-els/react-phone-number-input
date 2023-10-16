@@ -16,6 +16,7 @@ const App: React.FC = () => {
       <PhoneNumberInput
         size={PhoneNumberInputSize.Medium}
         defaultValue={phoneNumber}
+        language="no"
         defaultCountryCode={countryCode}
         onCountryCodeChange={(newCountryCode) => {
           setCountryCode(newCountryCode);
