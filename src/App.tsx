@@ -184,8 +184,6 @@ function App() {
           ref={inputRef}
           style={{
             border: "2px solid transparent",
-            outline: activeInput === "phone" ? "2px solid #00f" : "none",
-            visibility: "hidden",
           }}
         />
       </div>
@@ -209,13 +207,12 @@ function App() {
         <div
           style={{
             display: "flex",
-
             alignItems: "center",
             border: "2px solid #e28b7a",
             height: "2rem",
             borderRadius: "0.5rem",
             paddingLeft: "0.5rem",
-            width: "100%",
+            width: "320px",
           }}
           onClick={() => {
             setActiveInput("phone");
